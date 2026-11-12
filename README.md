@@ -17,3 +17,32 @@ A console-based banking simulation developed in C++ using Object-Oriented Progra
    ```bash
    ./bank_app
    ```
+
+
+  # Library Management System (C++)
+
+A console-based **Library Management System** developed in C++ using Object-Oriented Programming (OOP) principles and file handling. Created as part of the **Thiranex C++ Programming Internship**.
+
+## Features
+- **Object-Oriented Design:** Uses dedicated `Book`, `Member`, and `Library` classes to manage records cleanly.
+- **Book & Member Management:** Add new books and register library members with unique IDs.
+- **Issue & Return Tracking:** Issue available books to registered members and process returns.
+- **Search Functionality:** Case-insensitive search for books by **Title** or **Author**.
+- **Persistent Storage:** Automatically saves and loads book and member records using local text files (`books.txt` and `members.txt`).
+
+## How to Compile and Run
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com
+   cd Library-Management-System
+   ```
+
+2. **Compile the code using g++:**
+   ```bash
+   g++ library_management.cpp -o library_management
+   ```
+
+3. **Run the executable:**
+   - **Windows:** `library_management.exe`
+   - **Linux/macOS:** `./library_management`
