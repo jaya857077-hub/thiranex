@@ -46,3 +46,20 @@ A console-based **Library Management System** developed in C++ using Object-Orie
 3. **Run the executable:**
    - **Windows:** `library_management.exe`
    - **Linux/macOS:** `./library_management`
+
+
+
+
+### 2. Tic Tac Toe Mini Game (`tic_tac_toe.cpp`)
+- **Concepts Used:** 2D Arrays, Nested Loops, Conditional Logic.
+- **Features:**
+  - Dynamic console board updates after every move.
+  - Input validation and win/draw detection.
+  - Replay loop for continuous gameplay.
+
+## How to Run
+Compile and run using any standard C++ compiler (such as `g++`):
+```bash
+g++ library_management.cpp -o library
+./library
+```
