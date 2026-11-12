@@ -1,0 +1,202 @@
+#include <iostream>
+#include <fstream>
+#include <iomanip>
+#include <string>
+
+using namespace std;
+
+class BankAccount {
+private:
+    int accountNumber;
+    char holderName[50];
+    int pin;
+    double balance;
+
+public:
+    void createAccount() {
+        cout << "\n--- Create New Account ---\n";
+        cout << "Enter Account Number: ";
+        cin >> accountNumber;
+        cin.ignore();
+        cout << "Enter Account Holder Name: ";
+        cin.getline(holderName, 50);
+        cout << "Set a 4-Digit Security PIN: ";
+        cin >> pin;
+        cout << "Enter Initial Deposit Amount: $";
+        cin >> balance;
+        cout << "\nAccount created successfully!\n";
+    }
+
+    void showAccount() const {
+        cout << "\n--- Account Details ---\n";
+        cout << "Account Number : " << accountNumber << endl;
+        cout << "Holder Name    : " << holderName << endl;
+        cout << "Current Balance: $" << fixed << setprecision(2) << balance << endl;
+    }
+
+    void deposit(double amount) {
+        if (amount > 0) {
+            balance += amount;
+            cout << "Deposit successful! New Balance: $" << fixed << setprecision(2) << balance << endl;
+        } else {
+            cout << "Invalid deposit amount.\n";
+        }
+    }
+
+    void withdraw(double amount) {
+        if (amount > 0 && amount <= balance) {
+            balance -= amount;
+            cout << "Withdrawal successful! Remaining Balance: $" << fixed << setprecision(2) << balance << endl;
+        } else if (amount > balance) {
+            cout << "Insufficient balance!\n";
+        } else {
+            cout << "Invalid withdrawal amount.\n";
+        }
+    }
+
+    int getAccountNumber() const {
+        return accountNumber;
+    }
+
+    bool verifyPin(int enteredPin) const {
+        return pin == enteredPin;
+    }
+};
+
+// Function Prototypes for File Handling
+void saveAccountToFile();
+void handleTransaction(int option);
+void checkBalance();
+
+int main() {
+    int choice;
+
+    do {
+        cout << "\n====================================\n";
+        cout << "     BANK MANAGEMENT APPLICATION    \n";
+        cout << "====================================\n";
+        cout << "1. Create New Account\n";
+        cout << "2. Deposit Money\n";
+        cout << "3. Withdraw Money\n";
+        cout << "4. Balance Inquiry\n";
+        cout << "5. Exit\n";
+        cout << "Select an option (1-5): ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1:
+                saveAccountToFile();
+                break;
+            case 2:
+                handleTransaction(1); // 1 for Deposit
+                break;
+            case 3:
+                handleTransaction(2); // 2 for Withdrawal
+                break;
+            case 4:
+                checkBalance();
+                break;
+            case 5:
+                cout << "Thank you for using the Bank Management Application. Goodbye!\n";
+                break;
+            default:
+                cout << "Invalid option. Please try again.\n";
+        }
+    } while (choice != 5);
+
+    return 0;
+}
+
+void saveAccountToFile() {
+    BankAccount acc;
+    ofstream outFile("bank_records.dat", ios::binary | ios::app);
+    if (!outFile) {
+        cout << "Error opening file for writing!\n";
+        return;
+    }
+    acc.createAccount();
+    outFile.write(reinterpret_cast<char*>(&acc), sizeof(BankAccount));
+    outFile.close();
+}
+
+void handleTransaction(int option) {
+    int accNum, enteredPin;
+    double amount;
+    bool found = false;
+
+    cout << "\nEnter Account Number: ";
+    cin >> accNum;
+    cout << "Enter 4-Digit Security PIN: ";
+    cin >> enteredPin;
+
+    fstream file("bank_records.dat", ios::binary | ios::in | ios::out);
+    if (!file) {
+        cout << "No account records found. Please create an account first.\n";
+        return;
+    }
+
+    BankAccount acc;
+    while (!file.eof() && !found) {
+        streampos pos = file.tellg();
+        if (file.read(reinterpret_cast<char*>(&acc), sizeof(BankAccount))) {
+            if (acc.getAccountNumber() == accNum) {
+                found = true;
+                if (acc.verifyPin(enteredPin)) {
+                    if (option == 1) {
+                        cout << "Enter amount to deposit: $";
+                        cin >> amount;
+                        acc.deposit(amount);
+                    } else if (option == 2) {
+                        cout << "Enter amount to withdraw: $";
+                        cin >> amount;
+                        acc.withdraw(amount);
+                    }
+                    // Move file pointer back and overwrite updated record
+                    file.seekp(pos);
+                    file.write(reinterpret_cast<char*>(&acc), sizeof(BankAccount));
+                } else {
+                    cout << "Incorrect PIN! Access denied.\n";
+                }
+            }
+        }
+    }
+
+    file.close();
+    if (!found) {
+        cout << "Account number not found.\n";
+    }
+}
+
+void checkBalance() {
+    int accNum, enteredPin;
+    bool found = false;
+
+    cout << "\nEnter Account Number: ";
+    cin >> accNum;
+    cout << "Enter 4-Digit Security PIN: ";
+    cin >> enteredPin;
+
+    ifstream inFile("bank_records.dat", ios::binary);
+    if (!inFile) {
+        cout << "No account records found.\n";
+        return;
+    }
+
+    BankAccount acc;
+    while (inFile.read(reinterpret_cast<char*>(&acc), sizeof(BankAccount))) {
+        if (acc.getAccountNumber() == accNum) {
+            found = true;
+            if (acc.verifyPin(enteredPin)) {
+                acc.showAccount();
+            } else {
+                cout << "Incorrect PIN! Access denied.\n";
+            }
+            break;
+        }
+    }
+
+    inFile.close();
+    if (!found) {
+        cout << "Account number not found.\n";
+    }
+}
